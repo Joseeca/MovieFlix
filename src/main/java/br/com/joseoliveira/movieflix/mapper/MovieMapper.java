@@ -27,6 +27,7 @@ public class MovieMapper {
                 .toList();
 
         return Movie.builder()
+                .id(request.id())
                 .title(request.title())
                 .description(request.description())
                 .releaseDate(request.releaseDate())
@@ -47,6 +48,7 @@ public class MovieMapper {
                 .toList();
 
         return MovieResponse.builder()
+                .id(movie.getId())
                 .title(movie.getTitle())
                 .description(movie.getDescription())
                 .releaseDate(movie.getReleaseDate())
