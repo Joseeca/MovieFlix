@@ -1,4 +1,4 @@
 CREATE TABLE category (
-    id serial PRIMARY KEY,
+    id bigserial PRIMARY KEY,
     name varchar(100) NOT NULL
 );

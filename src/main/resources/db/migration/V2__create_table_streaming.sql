@@ -1,4 +1,4 @@
 CREATE TABLE streaming (
-    id serial primary key,
+    id bigserial primary key,
     name varchar(100) NOT NULL
 );

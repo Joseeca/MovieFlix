@@ -1,15 +1,19 @@
 package br.com.joseoliveira.movieflix.controller;
 
+import br.com.joseoliveira.movieflix.config.TokenService;
 import br.com.joseoliveira.movieflix.controller.request.LoginRequest;
 import br.com.joseoliveira.movieflix.controller.request.UserRequest;
+import br.com.joseoliveira.movieflix.controller.response.LoginResponse;
 import br.com.joseoliveira.movieflix.controller.response.UserResponse;
 import br.com.joseoliveira.movieflix.entity.User;
+import br.com.joseoliveira.movieflix.exception.UsernameOrPasswordInvalidException;
 import br.com.joseoliveira.movieflix.mapper.UserMapper;
 import br.com.joseoliveira.movieflix.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,12 +22,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/movieflix/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
+    private final TokenService tokenService;
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@RequestBody UserRequest request){
@@ -32,11 +37,21 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest request){
-        UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.email(), request.password());
-        Authentication authenticate = authenticationManager.authenticate(userAndPass);
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request){
 
-        User user = (User) authenticate.getPrincipal();
+        try {
+            UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.email(), request.password());
+            Authentication authenticate = authenticationManager.authenticate(userAndPass);
 
+            User user = (User) authenticate.getPrincipal();
+
+            String token = tokenService.generateToken(user);
+
+            return ResponseEntity.ok(new LoginResponse(token));
+
+        } catch (BadCredentialsException e) {
+
+            throw new UsernameOrPasswordInvalidException("Usuário ou senha inválido!");
+        }
     }
 }
